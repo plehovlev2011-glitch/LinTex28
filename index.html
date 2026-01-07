@@ -11,7 +11,7 @@
         body {
             background-color: white;
             overflow-x: hidden;
-            padding-bottom: 60px; /* Отступ для навигации */
+            padding-bottom: 60px;
         }
         
         img {
@@ -43,7 +43,6 @@
     <img src="navigation-bar.png" class="nav-bar" onclick="playTap()">
 
     <audio id="bootAudio" src="boot.mp3" preload="auto"></audio>
-    <audio id="tapAudio" src="enter.mp3" preload="auto"></audio>
 
     <script>
         window.onload = function() {
@@ -51,8 +50,9 @@
         };
 
         function playTap() {
-            document.getElementById('tapAudio').currentTime = 0;
-            document.getElementById('tapAudio').play();
+            // Создаем новый аудио элемент для каждого клика
+            const audio = new Audio('tap.mp3');
+            audio.play();
         }
     </script>
 </body>
