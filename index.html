@@ -28,9 +28,35 @@
             height: auto;
             z-index: 100;
         }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .start-btn {
+            padding: 20px 40px;
+            font-size: 24px;
+            background-color: #000;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div class="overlay" id="overlay">
+        <button class="start-btn" onclick="startApp()">Начать</button>
+    </div>
+
     <img src="img1.png" onclick="playTap()">
     <img src="img2.png" onclick="playTap()">
     <img src="img3.png" onclick="playTap()">
@@ -43,19 +69,31 @@
     <img src="navigation-bar.png" class="nav-bar" onclick="playTap()">
 
     <audio id="bootAudio" src="boot.mp3" preload="auto"></audio>
+    <audio id="tapAudio" src="tap.mp3" preload="auto"></audio>
 
     <script>
-        window.onload = function() {
-            document.getElementById('bootAudio').play().catch(e => {
-                console.log("Автовоспроизведение не сработало, но звук будет работать при кликах");
-            });
-        };
+        let audioStarted = false;
+        
+        function startApp() {
+            // Скрываем оверлей
+            document.getElementById('overlay').style.display = 'none';
+            
+            // Воспроизводим звук загрузки
+            document.getElementById('bootAudio').play()
+                .then(() => {
+                    audioStarted = true;
+                })
+                .catch(e => {
+                    console.log("Ошибка воспроизведения звука:", e);
+                    audioStarted = true; // Все равно помечаем как начатое
+                });
+        }
 
         function playTap() {
-            // Создаем новый аудио элемент для каждого клика
-            const audio = new Audio('tap.mp3');
-            audio.play().catch(e => {
-                console.log("Ошибка воспроизведения звука:", e);
+            // Сбрасываем и воспроизводим звук тапа
+            document.getElementById('tapAudio').currentTime = 0;
+            document.getElementById('tapAudio').play().catch(e => {
+                console.log("Ошибка воспроизведения tap:", e);
             });
         }
     </script>
