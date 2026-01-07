@@ -2,22 +2,128 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            background-color: white;
+            background-color: #000;
             overflow-x: hidden;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            transition: background-color 1.5s ease;
+            min-height: 100vh;
             padding-bottom: 60px;
+        }
+        
+        body.content-loaded {
+            background-color: white;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #000 0%, #111 50%, #000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease, transform 1s ease;
+            opacity: 1;
+        }
+        
+        .overlay.hidden {
+            opacity: 0;
+            transform: translateY(-100%);
+            pointer-events: none;
+        }
+        
+        .start-btn {
+            padding: 24px 60px;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, #4a00e0, #8e2de2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(142, 45, 226, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(142, 45, 226, 0.6);
+        }
+        
+        .start-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .start-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .start-btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .content {
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .content.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        .image-container {
+            display: block;
+            width: 100vw;
+            height: auto;
+            overflow: hidden;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: brightness(1.1) contrast(1.05);
+        }
+        
+        .image-container.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
         }
         
         img {
             display: block;
-            width: 100vw;
+            width: 100%;
             height: auto;
+            transition: transform 0.6s ease;
+        }
+        
+        .image-container:hover img {
+            transform: scale(1.02);
         }
         
         .nav-bar {
@@ -27,46 +133,103 @@
             width: 100vw;
             height: auto;
             z-index: 100;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) 1s;
         }
         
-        .overlay {
+        .nav-bar.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Градиентный переход фона */
+        .bg-transition {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            background: linear-gradient(to top, #000 0%, white 100%);
+            z-index: 900;
+            opacity: 0;
+            pointer-events: none;
+            animation: bgTransition 2s ease-out forwards;
         }
         
-        .start-btn {
-            padding: 20px 40px;
-            font-size: 24px;
-            background-color: #000;
-            color: white;
-            border: none;
-            cursor: pointer;
+        @keyframes bgTransition {
+            0% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                display: none;
+            }
         }
+        
+        /* Эффект затухания для изображений */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* Плавные задержки для каждого изображения */
+        .image-container:nth-child(1) { transition-delay: 0.1s; }
+        .image-container:nth-child(2) { transition-delay: 0.2s; }
+        .image-container:nth-child(3) { transition-delay: 0.3s; }
+        .image-container:nth-child(4) { transition-delay: 0.4s; }
+        .image-container:nth-child(5) { transition-delay: 0.5s; }
+        .image-container:nth-child(6) { transition-delay: 0.6s; }
+        .image-container:nth-child(7) { transition-delay: 0.7s; }
+        .image-container:nth-child(8) { transition-delay: 0.8s; }
     </style>
 </head>
 <body>
     <div class="overlay" id="overlay">
-        <button class="start-btn" onclick="startApp()">Начать</button>
+        <button class="start-btn" onclick="startApp()">START</button>
     </div>
-
-    <img src="img1.png" onclick="playTap()">
-    <img src="img2.png" onclick="playTap()">
-    <img src="img3.png" onclick="playTap()">
-    <img src="img4.png" onclick="playTap()">
-    <img src="img5.png" onclick="playTap()">
-    <img src="img6.png" onclick="playTap()">
-    <img src="img7.png" onclick="playTap()">
-    <img src="img8.png" onclick="playTap()">
     
-    <img src="navigation-bar.png" class="nav-bar" onclick="playTap()">
+    <div class="bg-transition" id="bgTransition"></div>
+    
+    <div class="content" id="content">
+        <div class="image-container" onclick="playTap()">
+            <img src="img1.png" alt="Image 1">
+        </div>
+        <div class="image-container" onclick="playTap()">
+            <img src="img2.png" alt="Image 2">
+        </div>
+        <div class="image-container" onclick="playTap()">
+            <img src="img3.png" alt="Image 3">
+        </div>
+        <div class="image-container" onclick="playTap()">
+            <img src="img4.png" alt="Image 4">
+        </div>
+        <div class="image-container" onclick="playTap()">
+            <img src="img5.png" alt="Image 5">
+        </div>
+        <div class="image-container" onclick="playTap()">
+            <img src="img6.png" alt="Image 6">
+        </div>
+        <div class="image-container" onclick="playTap()">
+            <img src="img7.png" alt="Image 7">
+        </div>
+        <div class="image-container" onclick="playTap()">
+            <img src="img8.png" alt="Image 8">
+        </div>
+        
+        <div class="nav-bar" id="navBar">
+            <img src="navigation-bar.png" alt="Navigation Bar">
+        </div>
+    </div>
 
     <audio id="bootAudio" src="boot.mp3" preload="auto"></audio>
     <audio id="tapAudio" src="tap.mp3" preload="auto"></audio>
@@ -75,27 +238,74 @@
         let audioStarted = false;
         
         function startApp() {
-            // Скрываем оверлей
-            document.getElementById('overlay').style.display = 'none';
-            
             // Воспроизводим звук загрузки
             document.getElementById('bootAudio').play()
                 .then(() => {
                     audioStarted = true;
                 })
                 .catch(e => {
-                    console.log("Ошибка воспроизведения звука:", e);
-                    audioStarted = true; // Все равно помечаем как начатое
+                    console.log("Boot sound error:", e);
+                    audioStarted = true;
                 });
+            
+            // Запускаем градиентный переход фона
+            const bgTransition = document.getElementById('bgTransition');
+            bgTransition.style.display = 'block';
+            
+            // Через 1 секунду начинаем анимацию контента
+            setTimeout(() => {
+                // Меняем фон body
+                document.body.classList.add('content-loaded');
+                
+                // Скрываем оверлей
+                const overlay = document.getElementById('overlay');
+                overlay.classList.add('hidden');
+                
+                // Показываем контент
+                const content = document.getElementById('content');
+                content.classList.add('visible');
+                
+                // Анимируем появление изображений с задержкой
+                const images = document.querySelectorAll('.image-container');
+                images.forEach((img, index) => {
+                    setTimeout(() => {
+                        img.classList.add('visible');
+                    }, 300 + (index * 80)); // Каскадная анимация
+                });
+                
+                // Показываем навигационную панель
+                setTimeout(() => {
+                    const navBar = document.getElementById('navBar');
+                    navBar.classList.add('visible');
+                }, 1500);
+                
+                // Убираем градиентный переход через 2 секунды
+                setTimeout(() => {
+                    bgTransition.style.display = 'none';
+                }, 2000);
+                
+            }, 1000);
         }
 
         function playTap() {
-            // Сбрасываем и воспроизводим звук тапа
-            document.getElementById('tapAudio').currentTime = 0;
-            document.getElementById('tapAudio').play().catch(e => {
-                console.log("Ошибка воспроизведения tap:", e);
+            if (!audioStarted) {
+                // Если звук еще не был инициализирован, инициализируем
+                audioStarted = true;
+            }
+            
+            // Воспроизводим звук тапа
+            const tapAudio = document.getElementById('tapAudio');
+            tapAudio.currentTime = 0;
+            tapAudio.play().catch(e => {
+                console.log("Tap sound error:", e);
             });
         }
+        
+        // Предварительная загрузка звука тапа для лучшего отклика
+        window.addEventListener('load', () => {
+            const tapAudio = document.getElementById('tapAudio');
+            tapAudio.load();
+        });
     </script>
 </body>
 </html>
